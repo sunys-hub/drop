@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>📦 성은 님이 보급품을 보냈습니다</title>
+<meta name="description" content="꾹 눌러서 보급상자를 열어보세요">
+<meta property="og:type" content="website">
+<meta property="og:title" content="📦 성은 님이 보급품을 보냈습니다">
+<meta property="og:description" content="꾹 눌러서 보급상자를 열어보세요">
+<!-- 배포 후 실제 주소로 바꿔주세요 (1200x630 이미지 권장) -->
+<meta property="og:image" content="https://YOUR-ID.github.io/YOUR-REPO/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0d0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Black+Ops+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d0a; --olive:#4b5320; --amber:#f2a900; --red:#d93a2b;
+  --legend:#ffcf4a; --txt:#ece7d6;
+  --kr:'Black Han Sans',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --en:'Black Ops One','Impact',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);overflow:hidden;
+  font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+button{font:inherit}
+
+#app{position:fixed;inset:0;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 30%,#29301f 0%,#13160f 58%,#060705 100%)}
+#app.shake{animation:shk .45s}
+@keyframes shk{20%{transform:translate(-6px,4px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}}
+
+/* 화면 효과 */
+.fx-scan{position:absolute;inset:0;pointer-events:none;z-index:70;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
+.fx-vig{position:absolute;inset:0;pointer-events:none;z-index:69;box-shadow:inset 0 0 180px rgba(0,0,0,.9)}
+.cloud{position:absolute;border-radius:50%;background:rgba(220,230,200,.05);filter:blur(18px);pointer-events:none}
+.c1{width:340px;height:90px;top:22%;left:-20%;animation:drift 38s linear infinite}
+.c2{width:260px;height:70px;top:58%;left:-30%;animation:drift 52s linear infinite -20s}
+.c3{width:420px;height:110px;top:76%;left:-40%;animation:drift 64s linear infinite -40s}
+@keyframes drift{to{transform:translateX(170vw)}}
+
+/* 상단 HUD */
+.hud{position:absolute;left:0;right:0;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 14px) 16px 0;opacity:0;transition:opacity .6s;
+  font-family:var(--en);font-size:11px;letter-spacing:.15em}
+#app.started .hud,#app.started .squad{opacity:1}
+.live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:7px;animation:blink 1s infinite}
+.compass{position:relative;width:132px;overflow:hidden;white-space:nowrap;padding-bottom:6px;
+  border-bottom:1px solid rgba(255,255,255,.28);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 25%,#000 75%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 25%,#000 75%,transparent)}
+.compass span{display:inline-block;animation:cmp 14s ease-in-out infinite alternate}
+@keyframes cmp{to{transform:translateX(-55%)}}
+.compass-wrap{position:relative}
+.compass-wrap::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);
+  border:5px solid transparent;border-bottom-color:var(--amber)}
+#mute{width:34px;height:34px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.25);color:var(--txt);font-size:15px;cursor:pointer}
+
+/* 하단 스쿼드 */
+.squad{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 16px);z-index:30;
+  display:flex;justify-content:center;gap:8px;list-style:none;opacity:0;transition:opacity .6s}
+.squad li{display:flex;flex-direction:column;gap:4px;width:66px;opacity:.45;transition:opacity .4s}
+.squad li .nm{display:flex;align-items:center;gap:5px;font-size:12px}
+.squad li .nm i{font-style:normal;width:15px;height:15px;display:grid;place-items:center;font-size:9px;
+  font-family:var(--en);background:rgba(255,255,255,.15)}
+.squad li .hp{height:3px;background:rgba(255,255,255,.15)}
+.squad li .hp b{display:block;height:100%;width:0;background:#e9e4d2;transition:width .8s}
+.squad li .st{font-family:var(--en);font-size:9px;letter-spacing:.12em;color:rgba(255,255,255,.45)}
+.squad li.on{opacity:1}
+.squad li.on .nm i{background:var(--amber);color:#000}
+.squad li.on .hp b{width:100%}
+.squad li.on .st{color:var(--amber)}
+
+/* 킬피드 */
+.feed{position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 60px);z-index:40;
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+.kf{background:rgba(0,0,0,.6);padding:6px 10px;font-size:12px;border-right:2px solid var(--amber);
+  animation:kfin .35s ease-out;transition:opacity .5s,transform .5s;white-space:nowrap}
+.kf b{color:var(--amber);font-weight:700}
+.kf i{font-style:normal;margin:0 6px;opacity:.55}
+.kf em{font-style:normal;color:var(--legend);margin-left:6px}
+.kf.out{opacity:0;transform:translateX(24px)}
+@keyframes kfin{from{opacity:0;transform:translateX(30px)}}
+
+/* 공통 장면 */
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s;z-index:5}
+.scene.active{opacity:1;visibility:visible}
+.lbl{font-family:var(--en);letter-spacing:.28em;font-size:12px;color:var(--amber)}
+@keyframes blink{50%{opacity:.25}}
+@keyframes pulse{50%{opacity:.55}}
+
+/* 0. 무전 수신 */
+#s0{cursor:pointer}
+.radio{text-align:center;padding:24px}
+.ant{position:relative;width:96px;height:96px;margin:0 auto 30px;display:grid;place-items:center}
+.ant::before,.ant::after{content:"";position:absolute;inset:0;border:2px solid var(--amber);border-radius:50%;
+  opacity:0;animation:ping 2.2s infinite}
+.ant::after{animation-delay:1.1s}
+@keyframes ping{0%{transform:scale(.45);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.ant svg{width:46px;height:46px}
+.radio h1{font-family:var(--kr);font-weight:400;font-size:clamp(32px,9vw,46px);margin:12px 0 8px}
+.from{font-size:14px;opacity:.7;letter-spacing:.12em}
+.from b{color:var(--amber)}
+.tap{margin-top:46px;display:inline-block;padding:13px 24px;font-size:14px;color:var(--amber);
+  border:1px solid rgba(242,169,0,.55);background:rgba(242,169,0,.06);animation:pulse 1.4s infinite;
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+
+/* 1. 보급 투하 */
+#s1{cursor:pointer}
+#plane{position:absolute;top:9%;left:-45%;width:170px;opacity:.9}
+#plane.fly{animation:fly 5.2s linear forwards}
+@keyframes fly{to{left:125%}}
+.type{position:absolute;left:0;right:0;top:17%;text-align:center;min-height:1.4em;
+  font-family:var(--kr);font-size:clamp(21px,6vw,30px);color:var(--amber);
+  text-shadow:0 0 14px rgba(242,169,0,.4);transition:top .6s,font-size .6s,opacity .6s}
+.type::after{content:"▌";margin-left:3px;animation:blink 1s infinite}
+.type.dim{top:12%;font-size:17px;opacity:.65}
+.type.dim::after{content:""}
+.stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#drop{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:-6vh;
+  transform:translateY(-150vh)}
+#drop.falling{animation:fall 3.4s cubic-bezier(.22,.1,.35,1) forwards}
+@keyframes fall{to{transform:translateY(0)}}
+.sway{display:flex;flex-direction:column;align-items:center;transform-origin:50% 0}
+#drop.falling .sway{animation:sway 1.5s ease-in-out infinite alternate}
+#drop.landed .sway{animation:none}
+@keyframes sway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+#chute{width:min(62vw,270px);margin-bottom:-4px;transition:transform 1.5s ease-in,opacity 1.5s}
+#chute.gone{transform:translate(-45vw,-70vh) rotate(-38deg);opacity:0}
+#crateWrap{position:relative;width:min(50vw,215px);aspect-ratio:200/180}
+#crate{display:block;width:100%;height:100%;overflow:visible;will-change:transform}
+#lid,#glow{transform-box:fill-box;transform-origin:center}
+#lid{transition:transform .75s cubic-bezier(.2,.8,.3,1),opacity .75s}
+#lid.pop{transform:translate(-70px,-190px) rotate(-55deg);opacity:0}
+#glow{opacity:0;transition:opacity .4s}
+#glow.on{opacity:1}
+.beacon{animation:blink .8s infinite}
+#ringSvg{position:absolute;left:50%;top:50%;width:168%;transform:translate(-50%,-50%) rotate(-90deg);
+  opacity:0;transition:opacity .4s;overflow:visible}
+#ringSvg.on{opacity:1}
+.track{fill:none;stroke:rgba(255,255,255,.12);stroke-width:5}
+.ticks{fill:none;stroke:rgba(255,255,255,.25);stroke-width:10;stroke-dasharray:2 68.4}
+#ring{fill:none;stroke:var(--amber);stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 6px var(--amber))}
+#smoke{position:absolute;right:6%;bottom:8%;width:0;height:0}
+.puff{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(232,58,38,.6),rgba(200,40,30,0) 70%);animation:puff 2.8s ease-out forwards}
+@keyframes puff{from{transform:translate(0,0) scale(.4);opacity:.95}to{transform:translate(var(--dx),-200px) scale(4.2);opacity:0}}
+.dust{position:absolute;left:50%;bottom:2%;width:40px;height:22px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(200,190,160,.45),transparent 70%);animation:dust 1.1s ease-out forwards}
+@keyframes dust{from{transform:translate(-50%,0) scale(.5);opacity:.9}to{transform:translate(calc(-50% + var(--dx)),-14px) scale(3);opacity:0}}
+.hint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 92px);text-align:center;font-family:var(--kr);font-size:21px;
+  opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s;pointer-events:none}
+.hint small{display:block;margin-top:6px;font-family:-apple-system,sans-serif;font-size:12px;opacity:.55}
+.hint.on{opacity:1;transform:none;animation:pulse 1.3s infinite}
+#s1.holding .hint,#s1.loading .hint{opacity:0;animation:none}
+.pbar{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 100px);width:min(78vw,320px);transform:translateX(-50%);
+  opacity:0;transition:opacity .25s;pointer-events:none}
+.pbar.on{opacity:1}
+.pbar .row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:7px;font-size:13px}
+.pbar .row b{font-family:var(--en);font-weight:400;font-size:15px;color:var(--amber)}
+.pbar .bar{height:6px;background:rgba(255,255,255,.12)}
+.pbar .bar i{display:block;height:100%;width:0;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+
+/* 2. 아이템 공개 */
+.rays{position:absolute;left:50%;top:46%;width:190vmax;height:190vmax;transform:translate(-50%,-50%);
+  background:repeating-conic-gradient(rgba(255,207,74,.14) 0 6deg,transparent 6deg 18deg);
+  -webkit-mask-image:radial-gradient(circle,#000 0,transparent 50%);mask-image:radial-gradient(circle,#000 0,transparent 50%);
+  animation:spin 32s linear infinite}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.cardwrap{position:relative;filter:drop-shadow(0 0 30px rgba(255,207,74,.22));margin-top:-4vh}
+.card{width:min(88vw,380px);padding:30px 22px 24px;text-align:center;
+  background:linear-gradient(180deg,rgba(46,38,14,.95),rgba(16,15,10,.97));
+  border:1px solid rgba(255,207,74,.6);
+  clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);
+  transform:scale(.7);opacity:0}
+#s2.active .card{animation:popin .55s cubic-bezier(.2,1.4,.4,1) .1s forwards}
+@keyframes popin{to{transform:none;opacity:1}}
+.tag{display:inline-block;padding:4px 10px;font-family:var(--en);font-size:11px;letter-spacing:.2em;
+  color:#1c1500;background:var(--legend)}
+.tag small{font-family:-apple-system,sans-serif;font-weight:700;letter-spacing:0;margin-left:4px}
+.stars{margin-top:10px;color:var(--legend);letter-spacing:4px;font-size:13px}
+#msg{margin:14px 0 12px;font-family:var(--kr);font-weight:400;white-space:nowrap;line-height:1.1;
+  font-size:clamp(46px,14.5vw,82px);color:var(--legend)}
+#msg span{display:inline-block;opacity:0;transform:scale(2.6) rotate(-8deg)}
+#msg span.in{animation:stamp .34s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes stamp{to{opacity:1;transform:none}}
+#msg.glow{text-shadow:0 0 22px rgba(255,207,74,.55),0 4px 0 #6b4e00}
+.desc{font-size:14px;line-height:1.75;color:rgba(236,231,214,.82);opacity:0;transform:translateY(6px);transition:.5s}
+.desc.in{opacity:1;transform:none}
+.desc b{color:var(--legend)}
+.desc hr{border:0;border-top:1px dashed rgba(255,207,74,.3);margin:12px 0}
+.btn{display:block;width:100%;margin-top:22px;padding:15px;border:0;cursor:pointer;
+  font-family:var(--kr);font-size:21px;color:#1c1500;background:var(--legend);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+  opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s;pointer-events:none}
+.btn.in{opacity:1;transform:none;pointer-events:auto;animation:pulse 1.6s infinite .6s}
+.btn:active{transform:scale(.97)}
+
+/* 3. 준비 완료 */
+.ready{text-align:center;padding:20px;margin-top:-4vh}
+.ok{width:92px;height:92px;margin:0 auto 16px}
+.ok circle{fill:none;stroke:var(--amber);stroke-width:5;stroke-dasharray:277;stroke-dashoffset:277}
+.ok path{fill:none;stroke:var(--amber);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:70;stroke-dashoffset:70}
+#s3.active .ok circle{animation:draw .6s ease-out forwards}
+#s3.active .ok path{animation:draw .4s ease-out .5s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.ready h2{font-family:var(--kr);font-weight:400;font-size:clamp(50px,15vw,80px);margin:8px 0 20px}
+.cd{display:inline-flex;flex-direction:column;gap:4px;padding:12px 28px;border:1px solid rgba(242,169,0,.45);background:rgba(0,0,0,.35)}
+.cd span{font-size:12px;letter-spacing:.2em;color:var(--amber)}
+.cd b{font-family:var(--en);font-weight:400;font-size:34px;letter-spacing:.06em}
+.note{margin-top:20px;font-size:14px;opacity:.78}
+.note b{color:var(--amber)}
+.ghost{margin-top:24px;padding:10px 18px;background:none;border:1px solid rgba(255,255,255,.25);color:var(--txt);font-size:13px;cursor:pointer}
+
+#flash{position:absolute;inset:0;z-index:60;pointer-events:none;background:#fff6d8;opacity:0}
+#flash.on{animation:flash .9s ease-out}
+@keyframes flash{15%{opacity:.95}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+
+  <!-- 상단 HUD -->
+  <header class="hud">
+    <div class="live"><i></i>SQUAD · 01</div>
+    <div class="compass-wrap"><div class="compass"><span>255 · W · 285 · 300 · NW · 330 · 345 · N · 15 · 30 · NE · 60 · 75 · E · 105</span></div></div>
+    <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  </header>
+
+  <!-- 0. 무전 수신 -->
+  <section id="s0" class="scene active">
+    <div class="radio">
+      <div class="ant">
+        <svg viewBox="0 0 48 48" fill="none" stroke="#f2a900" stroke-width="3" stroke-linecap="round">
+          <circle cx="24" cy="20" r="4" fill="#f2a900"/>
+          <path d="M24 24 L16 44 M24 24 L32 44 M18.5 37 H29.5"/>
+          <path d="M15 11 a13 13 0 0 0 0 18 M33 11 a13 13 0 0 1 0 18"/>
+          <path d="M9 5 a21 21 0 0 0 0 30 M39 5 a21 21 0 0 1 0 30" opacity=".5"/>
+        </svg>
+      </div>
+      <p class="lbl">INCOMING TRANSMISSION</p>
+      <h1>수신된 무전 1건</h1>
+      <p class="from">FROM · <b>성은</b></p>
+      <div class="tap">화면을 터치해서 수신</div>
+    </div>
+  </section>
+
+  <!-- 1. 보급 투하 + 꾹 누르기 -->
+  <section id="s1" class="scene">
+    <svg id="plane" viewBox="0 0 200 60" fill="#0c0e09">
+      <path d="M8 30 Q10 22 30 21 L150 19 Q178 19 192 28 Q178 36 150 36 L30 37 Q10 37 8 30Z"/>
+      <path d="M70 21 L112 2 L124 2 L104 21Z M70 37 L112 58 L124 58 L104 37Z"/>
+      <path d="M14 25 L4 8 L14 8 L30 22Z"/>
+      <rect x="92" y="6" width="3" height="14"/><rect x="92" y="40" width="3" height="14"/>
+    </svg>
+    <p id="type" class="type"></p>
+
+    <div class="stage">
+      <div id="drop">
+        <div class="sway">
+          <svg id="chute" viewBox="0 0 240 200">
+            <defs>
+              <clipPath id="canopy"><path d="M10 74 Q120 -42 230 74 Q205 62 175 68 Q148 58 120 66 Q92 58 65 68 Q35 62 10 74Z"/></clipPath>
+            </defs>
+            <g stroke="#cfc8b0" stroke-width="1.3" opacity=".75">
+              <line x1="12" y1="73" x2="78" y2="200"/><line x1="66" y1="67" x2="84" y2="200"/>
+              <line x1="120" y1="65" x2="120" y2="200"/>
+              <line x1="174" y1="67" x2="156" y2="200"/><line x1="228" y1="73" x2="162" y2="200"/>
+            </g>
+            <g clip-path="url(#canopy)">
+              <rect x="0" y="0" width="240" height="80" fill="#e46a22"/>
+              <rect x="54" y="0" width="22" height="80" fill="#efe9d8"/>
+              <rect x="109" y="0" width="22" height="80" fill="#efe9d8"/>
+              <rect x="164" y="0" width="22" height="80" fill="#efe9d8"/>
+              <rect x="0" y="0" width="240" height="80" fill="url(#shadeC)"/>
+            </g>
+            <defs>
+              <linearGradient id="shadeC" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity=".15"/><stop offset="1" stop-color="#000" stop-opacity=".35"/>
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <div id="crateWrap">
+            <svg id="ringSvg" viewBox="0 0 260 260">
+              <circle class="track" cx="130" cy="130" r="112"/>
+              <circle class="ticks" cx="130" cy="130" r="122"/>
+              <circle id="ring" cx="130" cy="130" r="112"/>
+            </svg>
+            <svg id="crate" viewBox="0 0 200 180">
+              <defs>
+                <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8432c"/><stop offset="1" stop-color="#8a2315"/></linearGradient>
+                <linearGradient id="gLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dc573c"/><stop offset="1" stop-color="#a52d1b"/></linearGradient>
+                <pattern id="haz" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                  <rect width="7" height="14" fill="#f2a900"/><rect x="7" width="7" height="14" fill="#16160f"/>
+                </pattern>
+                <radialGradient id="gGlow"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#ffcf4a" stop-opacity=".6"/><stop offset="1" stop-color="#ffcf4a" stop-opacity="0"/></radialGradient>
+              </defs>
+              <ellipse cx="100" cy="173" rx="92" ry="7" fill="rgba(0,0,0,.5)"/>
+              <ellipse id="glow" cx="100" cy="58" rx="130" ry="80" fill="url(#gGlow)"/>
+              <g>
+                <rect x="18" y="62" width="164" height="108" rx="5" fill="url(#gBody)" stroke="#3b0f08" stroke-width="3"/>
+                <rect x="20" y="148" width="160" height="12" fill="url(#haz)" opacity=".9"/>
+                <rect x="42" y="64" width="10" height="104" fill="#353a26"/>
+                <rect x="148" y="64" width="10" height="104" fill="#353a26"/>
+                <g stroke="#d8d2b8" stroke-width="4" fill="none" stroke-linecap="square">
+                  <path d="M22 82 V66 H36"/><path d="M178 82 V66 H164"/>
+                  <path d="M22 150 V166 H36"/><path d="M178 150 V166 H164"/>
+                </g>
+                <text x="100" y="112" text-anchor="middle" font-family="Black Ops One, Impact, sans-serif" font-size="25" fill="#f3e9d2" letter-spacing="3">SUPPLY</text>
+                <text x="100" y="134" text-anchor="middle" font-family="Black Ops One, monospace" font-size="11" fill="#f3e9d2" opacity=".8" letter-spacing="2">SQUAD · 20:00</text>
+              </g>
+              <g id="lid">
+                <rect x="10" y="40" width="180" height="26" rx="4" fill="url(#gLid)" stroke="#3b0f08" stroke-width="3"/>
+                <rect x="12" y="42" width="176" height="5" fill="rgba(255,255,255,.14)"/>
+                <rect x="76" y="29" width="48" height="13" rx="3" fill="#353a26" stroke="#1d2014" stroke-width="2"/>
+                <circle class="beacon" cx="170" cy="53" r="4.5" fill="#ffb300"/>
+              </g>
+            </svg>
+            <div id="smoke"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hint" class="hint">꾹 눌러서 보급상자 열기<small>PC는 스페이스바를 길게</small></div>
+    <div id="pbar" class="pbar">
+      <div class="row"><span id="ptxt">자물쇠 해제 중…</span><b id="ppct">0%</b></div>
+      <div class="bar"><i id="pfill"></i></div>
+    </div>
+  </section>
+
+  <!-- 2. 아이템 공개 -->
+  <section id="s2" class="scene">
+    <div class="rays"></div>
+    <div class="cardwrap">
+      <div class="card">
+        <span class="tag">LEGENDARY<small>· 보급 전용</small></span>
+        <div class="stars">★★★★★</div>
+        <h2 id="msg">8시 가야지</h2>
+        <div id="desc" class="desc">
+          효과: 오늘 밤 <b>20:00</b>, 스쿼드 전원 자동 집합<br>
+          부작용: 안 오면 자기장보다 무서운 잔소리
+          <hr>
+          보낸 사람 · <b>성은</b>
+        </div>
+        <button id="readyBtn" class="btn">준비 완료</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 준비 완료 -->
+  <section id="s3" class="scene">
+    <div class="ready">
+      <svg class="ok" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/><path d="M30 52 L45 66 L72 36"/></svg>
+      <p class="lbl">SQUAD READY</p>
+      <h2>20:00 집합</h2>
+      <div class="cd"><span id="cdLabel">낙하까지</span><b id="cd">--:--:--</b></div>
+      <p class="note">"늦으면 자기장 맞는다" — <b>성은</b></p>
+      <button id="replay" class="ghost">↻ 다시 열어보기</button>
+    </div>
+  </section>
+
+  <!-- 하단 스쿼드 -->
+  <ul class="squad">
+    <li class="on"><div class="nm"><i>1</i>성은</div><div class="hp"><b></b></div><div class="st">READY</div></li>
+    <li id="me"><div class="nm"><i>2</i>나</div><div class="hp"><b></b></div><div class="st">WAITING</div></li>
+    <li><div class="nm"><i>3</i>???</div><div class="hp"><b></b></div><div class="st">WAITING</div></li>
+    <li><div class="nm"><i>4</i>???</div><div class="hp"><b></b></div><div class="st">WAITING</div></li>
+  </ul>
+
+  <div id="feed" class="feed"></div>
+  <div id="flash"></div>
+  <div class="fx-vig"></div>
+  <div class="fx-scan"></div>
+</div>
+
+<script>
+/* ===== 설정 ===== */
+const SENDER = '성은';
+const MESSAGE = '8시 가야지';
+const MEET_HOUR = 20;          // 한국 시간 기준 집합 시각
+const HOLD_SECONDS = 1.8;      // 꾹 누르는 시간
+
+/* ===== 유틸 ===== */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const app = $('#app');
+function show(id){ document.querySelectorAll('.scene').forEach(s => s.classList.toggle('active', s.id === id)); }
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ===== 사운드 (Web Audio로 직접 합성, 외부 파일 없음) ===== */
+const A = { ctx:null, master:null, noise:null, muted:false };
+function audioInit(){
+  if (A.ctx){ A.ctx.resume(); return; }
+  const C = window.AudioContext || window.webkitAudioContext;
+  if (!C) return;
+  A.ctx = new C();
+  A.master = A.ctx.createGain();
+  A.master.gain.value = A.muted ? 0 : .8;
+  A.master.connect(A.ctx.destination);
+  const len = A.ctx.sampleRate * 2, buf = A.ctx.createBuffer(1, len, A.ctx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  A.noise = buf;
+}
+function env(g, t, a, peak, d){
+  g.gain.setValueAtTime(.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + a);
+  g.gain.exponentialRampToValueAtTime(.0001, t + a + d);
+}
+function noise({dur=.4, vol=.2, type='bandpass', f=1800, f2=null, q=.8, at=0} = {}){
+  if (!A.ctx) return;
+  const t = A.ctx.currentTime + at, s = A.ctx.createBufferSource(), fl = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
+  s.buffer = A.noise; s.loop = true;
+  fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f, t);
+  if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  env(g, t, .02, vol, dur);
+  s.connect(fl).connect(g).connect(A.master);
+  s.start(t, Math.random()); s.stop(t + dur + .1);
+}
+function tone({f=880, f2=null, dur=.1, vol=.12, type='square', at=0} = {}){
+  if (!A.ctx) return;
+  const t = A.ctx.currentTime + at, o = A.ctx.createOscillator(), g = A.ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  env(g, t, .005, vol, dur);
+  o.connect(g).connect(A.master);
+  o.start(t); o.stop(t + dur + .05);
+}
+const SFX = {
+  radio(){ noise({dur:.35, vol:.28, f:2400, q:.6}); tone({f:1350, dur:.06, vol:.07, at:.38}); tone({f:1350, dur:.06, vol:.07, at:.5}); },
+  plane(dur){
+    if (!A.ctx) return;
+    const t = A.ctx.currentTime, g = A.ctx.createGain(), lp = A.ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 360;
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(.16, t + dur * .45);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    [61, 64.5, 122].forEach(f => { const o = A.ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(t); o.stop(t + dur); });
+    lp.connect(g).connect(A.master);
+    noise({dur, vol:.05, type:'lowpass', f:700, q:.3});
+  },
+  type(){ tone({f:1700 + Math.random() * 500, dur:.012, vol:.035}); },
+  whoosh(){ noise({dur:2.8, vol:.12, f:2600, f2:260, q:1.1}); },
+  thump(){ tone({f:150, f2:36, dur:.4, vol:.55, type:'sine'}); noise({dur:.3, vol:.2, type:'lowpass', f:900}); },
+  tick(p){ tone({f:600 + p * 900, dur:.03, vol:.06}); },
+  fail(){ tone({f:320, f2:170, dur:.16, vol:.07}); },
+  open(){
+    noise({dur:.55, vol:.3, type:'highpass', f:1500, q:.5});
+    tone({f:95, f2:30, dur:.55, vol:.5, type:'sine'});
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone({f, dur:1, vol:.09, type:'triangle', at:.15 + i * .08}));
+  },
+  stamp(){ tone({f:230, f2:60, dur:.18, vol:.32, type:'sine'}); noise({dur:.07, vol:.14, type:'lowpass', f:1300}); },
+  feed(){ tone({f:980, dur:.05, vol:.05}); },
+  ready(){ [880, 1175, 1568].forEach((f, i) => tone({f, dur:.16, vol:.09, at:i * .09})); }
+};
+// 꾹 누르는 동안 올라가는 기계음
+let hum = null;
+function humStart(){
+  if (!A.ctx || hum) return;
+  const o = A.ctx.createOscillator(), lp = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
+  o.type = 'sawtooth'; o.frequency.value = 70; lp.type = 'lowpass'; lp.frequency.value = 500; g.gain.value = 0;
+  o.connect(lp).connect(g).connect(A.master); o.start();
+  hum = {o, lp, g};
+}
+function humSet(p, on){
+  if (!hum) return;
+  const t = A.ctx.currentTime;
+  hum.o.frequency.setTargetAtTime(70 + p * 260, t, .05);
+  hum.lp.frequency.setTargetAtTime(400 + p * 2200, t, .05);
+  hum.g.gain.setTargetAtTime(on ? .04 + p * .07 : 0, t, .06);
+}
+function humStop(){
+  if (!hum) return;
+  const h = hum; hum = null;
+  h.g.gain.setTargetAtTime(0, A.ctx.currentTime, .03);
+  setTimeout(() => { try { h.o.stop(); } catch (e) {} }, 300);
+}
+$('#mute').addEventListener('pointerdown', e => {
+  e.stopPropagation();
+  A.muted = !A.muted;
+  $('#mute').textContent = A.muted ? '🔇' : '🔊';
+  if (A.master) A.master.gain.value = A.muted ? 0 : .8;
+});
+
+/* ===== 킬피드 ===== */
+function feed(html){
+  const el = document.createElement('div');
+  el.className = 'kf'; el.innerHTML = html;
+  $('#feed').appendChild(el); SFX.feed();
+  setTimeout(() => el.classList.add('out'), 5200);
+  setTimeout(() => el.remove(), 5800);
+}
+
+/* ===== 0 → 1: 무전 수신 후 보급 투하 ===== */
+let started = false;
+async function start(){
+  if (started) return; started = true;
+  audioInit(); SFX.radio(); vib(30);
+  app.classList.add('started');
+  show('s1');
+  await sleep(400);
+  SFX.plane(5.2);
+  $('#plane').classList.add('fly');
+  await typeText($('#type'), '보급품이 투하되었습니다');
+  await sleep(500);
+  $('#drop').classList.add('falling');
+  SFX.whoosh();
+}
+async function typeText(el, text){
+  el.textContent = '';
+  for (const ch of text){ el.textContent += ch; if (ch !== ' ') SFX.type(); await sleep(60); }
+}
+$('#s0').addEventListener('pointerdown', start);
+
+$('#drop').addEventListener('animationend', e => { if (e.animationName === 'fall') land(); });
+let smokeTimer = null;
+async function land(){
+  const drop = $('#drop');
+  drop.classList.remove('falling'); drop.classList.add('landed');
+  drop.style.transform = 'translateY(0)';
+  SFX.thump(); vib(70);
+  app.classList.add('shake'); setTimeout(() => app.classList.remove('shake'), 450);
+  $('#chute').classList.add('gone');
+  for (let i = 0; i < 6; i++){
+    const d = document.createElement('div');
+    d.className = 'dust'; d.style.setProperty('--dx', (i - 2.5) * 34 + 'px');
+    $('#crateWrap').appendChild(d); setTimeout(() => d.remove(), 1200);
+  }
+  smokeTimer = setInterval(() => {
+    const p = document.createElement('div');
+    p.className = 'puff'; p.style.setProperty('--dx', (Math.random() * 60 - 10) + 'px');
+    $('#smoke').appendChild(p); setTimeout(() => p.remove(), 2900);
+  }, 140);
+  await sleep(500);
+  $('#type').classList.add('dim');
+  $('#type').textContent = 'FROM · ' + SENDER;
+  $('#hint').classList.add('on');
+  $('#ringSvg').classList.add('on');
+  canHold = true;
+}
+
+/* ===== 1: 꾹 눌러서 열기 ===== */
+let canHold = false, holding = false, opened = false, prog = 0, last = 0, lastTick = 0;
+const s1 = $('#s1'), ring = $('#ring'), crate = $('#crate');
+const RING_LEN = 2 * Math.PI * 112;
+ring.style.strokeDasharray = RING_LEN; ring.style.strokeDashoffset = RING_LEN;
+
+function holdOn(){
+  if (!canHold || opened || holding) return;
+  holding = true; audioInit(); humStart(); vib(20);
+  s1.classList.add('holding');
+}
+function holdOff(){
+  if (!holding) return;
+  holding = false; s1.classList.remove('holding');
+  if (!opened && prog > .05) SFX.fail();
+}
+s1.addEventListener('pointerdown', holdOn);
+window.addEventListener('pointerup', holdOff);
+window.addEventListener('pointercancel', holdOff);
+window.addEventListener('blur', holdOff);
+window.addEventListener('keydown', e => {
+  if (e.code !== 'Space' && e.code !== 'Enter') return;
+  e.preventDefault();
+  if (e.repeat) return;
+  if (!started) start(); else holdOn();
+});
+window.addEventListener('keyup', e => { if (e.code === 'Space' || e.code === 'Enter') holdOff(); });
+
+function loop(ts){
+  const dt = Math.min(.05, (ts - (last || ts)) / 1000); last = ts;
+  if (canHold && !opened){
+    prog += holding ? dt / HOLD_SECONDS : -dt / .9;
+    prog = Math.max(0, Math.min(1, prog));
+    ring.style.strokeDashoffset = RING_LEN * (1 - prog);
+    $('#pfill').style.width = (prog * 100) + '%';
+    $('#ppct').textContent = Math.floor(prog * 100) + '%';
+    $('#ptxt').textContent = prog < .4 ? '자물쇠 해제 중…' : prog < .8 ? '보급상자 여는 중…' : '거의 다 열렸다!';
+    $('#pbar').classList.toggle('on', prog > 0);
+    s1.classList.toggle('loading', prog > 0);
+    const step = Math.floor(prog * 10);
+    if (holding && step > lastTick){ SFX.tick(prog); if (step % 3 === 0) vib(12); }
+    lastTick = step;
+    const amp = holding ? 1 + prog * 7 : 0;
+    crate.style.transform = amp
+      ? `translate(${(Math.random() - .5) * amp}px,${(Math.random() - .5) * amp}px) rotate(${(Math.random() - .5) * amp * .5}deg)`
+      : '';
+    humSet(prog, holding);
+    if (prog >= 1){ opened = true; openCrate(); }
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ===== 1 → 2: 상자 개봉 ===== */
+async function openCrate(){
+  holding = false; s1.classList.remove('holding'); humStop();
+  crate.style.transform = '';
+  SFX.open(); vib([40, 30, 90]);
+  $('#lid').classList.add('pop');
+  $('#glow').classList.add('on');
+  $('#hint').classList.remove('on');
+  $('#pbar').classList.remove('on');
+  $('#ringSvg').classList.remove('on');
+  const fl = $('#flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
+  await sleep(750);
+  clearInterval(smokeTimer);
+  show('s2');
+  revealMessage();
+}
+async function revealMessage(){
+  const el = $('#msg');
+  el.innerHTML = '';
+  [...MESSAGE].forEach(ch => { const s = document.createElement('span'); s.textContent = ch === ' ' ? ' ' : ch; el.appendChild(s); });
+  await sleep(650);
+  for (const s of el.children){
+    s.classList.add('in');
+    if (s.textContent.trim()) { SFX.stamp(); vib(15); }
+    await sleep(150);
+  }
+  el.classList.add('glow');
+  await sleep(350);
+  feed(`<b>${SENDER}</b><i>▸</i>당신<em>[보급 전달]</em>`);
+  $('#desc').classList.add('in');
+  await sleep(900);
+  feed(`<b>${SENDER}</b> 님이 스쿼드에 초대했습니다`);
+  $('#readyBtn').classList.add('in');
+}
+
+/* ===== 2 → 3: 준비 완료 ===== */
+$('#readyBtn').addEventListener('click', async () => {
+  SFX.ready(); vib([20, 40, 20]);
+  const me = $('#me'); me.classList.add('on'); me.querySelector('.st').textContent = 'READY';
+  show('s3');
+  tickCountdown();
+  await sleep(500);
+  feed('<b>당신</b> 님이 준비 완료했습니다');
+  await sleep(1300);
+  feed(`스쿼드 집합<em>${String(MEET_HOUR).padStart(2, '0')}:00 출발</em>`);
+});
+$('#replay').addEventListener('click', () => location.reload());
+
+/* ===== 카운트다운 (한국 시간 기준) ===== */
+let cdTimer = null;
+function kstNow(){ const d = new Date(); return new Date(d.getTime() + (d.getTimezoneOffset() + 540) * 60000); }
+function tickCountdown(){
+  clearTimeout(cdTimer);
+  const now = kstNow(), target = new Date(now);
+  target.setHours(MEET_HOUR, 0, 0, 0);
+  const diff = target - now;
+  if (diff > 0){
+    const h = Math.floor(diff / 3.6e6), m = Math.floor(diff % 3.6e6 / 6e4), s = Math.floor(diff % 6e4 / 1000);
+    $('#cd').textContent = [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+    $('#cdLabel').textContent = '낙하까지';
+  } else {
+    $('#cd').textContent = 'GO GO GO';
+    $('#cdLabel').textContent = '이미 출발했다 · 지금 바로 접속';
+  }
+  cdTimer = setTimeout(tickCountdown, 1000);
+}
+</script>
+</body>
+</html>
